@@ -1,11 +1,14 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import GoogleGenerativeAI
 from dotenv import load_dotenv
 
 
 load_dotenv()
 
-model=ChatGoogleGenerativeAI(model='gemini-2.5-flash')
+model=GoogleGenerativeAI(model='gemini-2.5-flash')
 
-result = model.invoke("What is the capital of India")
-
-print(result.content)
+while True:
+    user_input=input('You:  ')+"in 100 words"
+    if user_input == 'exit':
+        break
+    result=model.invoke(user_input)
+    print("AI :",result)
