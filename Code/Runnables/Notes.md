@@ -461,3 +461,122 @@ Runnable pattern se:
 - Components reusable ban gaye
 - Chains easily compose ho sakte hain
 - Maintenance easy ho gayi
+
+
+## Types of Runnables
+
+### 1. Task Specific Runnables
+
+- Khaas AI tasks ke liye bane hain
+- Ready-to-use components jo specific kaam karte hain
+- Jaise:
+
+    - Chat Models (GPT, Gemini, etc.)
+    - Prompt Templates
+    - Output Parsers
+    - Document Loaders
+
+- Hamare custom runnable mein jo nakli wali classes banai thi wo task specific runnables hai
+
+Examples:
+```python
+# Chat Model (Task Specific)
+from langchain_community.chat_models import ChatOpenAI
+chat_model = ChatOpenAI(model="gpt-3.5-turbo")
+
+# Prompt Template (Task Specific)
+from langchain_core.prompts import ChatPromptTemplate
+prompt = ChatPromptTemplate.from_template("Tell me about {topic}")
+
+# Output Parser (Task Specific)
+from langchain_core.output_parsers import StrOutputParser
+parser = StrOutputParser()
+```
+
+
+### 2. Runnable Primitives
+
+- Basic operations ke liye
+- Chain banane ke building blocks
+- Jaise:
+
+    - RunnableLambda (Custom functions ke liye)
+    - RunnableParallel (Parallel execution ke liye)
+    - RunnableMap (Data transform karne ke liye)
+
+- Hamare custom code mein jo RunnableConnector banaya hai wo hai ye
+
+Examples:
+```python
+from langchain_core.runnables import RunnableLambda, RunnableParallel
+
+# RunnableLambda (Primitive) - Custom function
+def add_prefix(text):
+    return "AI: " + text
+
+runnable_lambda = RunnableLambda(add_prefix)
+
+# RunnableParallel (Primitive) - Multiple tasks ek saath
+parallel_runnable = RunnableParallel({
+    'joke': chat_model,
+    'length': RunnableLambda(lambda x: len(x))
+})
+```
+
+## Runnable Primitives in Langchain
+
+### 1. RunnableSequence
+
+- This is a sequential chain of runnables in LC that executes each step one after another, passing output of one step as the input to the other ( RunnableConnector jo banaya tha wahi hai ye)
+
+### 2. RunnableParallel
+
+- Name se hi samjh a rha ki parallel task ho aur fir saath mein connect ho end mein
+
+
+### 3. RunnablePassthrough
+
+- Its a special primitive that simply returns the input as output without modifying it
+- Whats the use then? 
+    - Original data ko persist karne ke liye
+    - Jaise manlo ek chain mein 10 runnables hai
+    - Ek ak ip doosre ka op ban gya 
+    - Lekin man lo tumhare 5th runnable ke baad wale ka output bhi kahin print karana hai
+    - Agar poori chain execute hogi to sirf last wala output hi aega
+    - Is kaam ke liye we can use this 
+
+    - Aur dhyan do to jo upar ek joke generate karke explanation wali chain banayi hai
+    - Usmein joke kya tha pata karna ho to ??
+    - Yes , then we use this RunnablePrimitive
+
+
+### 4. RunnableLambda
+
+- RunnableLambda is a runnable primitive that allows you to apply custom Python Functions within an AI pipeline
+- It acts as a middleware between different AI components , enabling preprocessing, transformation, API calls, filtering and post processing in a Langchain workflow
+- Basically Ek LLM workflow mein python code insert kar sakte ( is primitive se python function ko runnables bana sakte hai)
+
+### 5. RunnableBranch
+
+
+- Ye ek "if-else" statement ki tarah kaam karta hai
+- Condition ke hisaab se different paths mein data route karta hai
+- Multiple branches mein se ek ko choose karta hai
+
+- Syntax:
+
+```python
+RunnableBranch(
+    (condition1, branch1_chain),
+    (condition2, branch2_chain),
+    ...
+    default_chain
+)
+```
+
+
+# LCEL ( LangChain Expression Language )
+
+- Since RunnableSequence is used everywhere
+- To unne syntax change kar diya with `| (pipe)` operator
+- *`Instead of RunnableSequence(sq1,sq2,sq3...) use sq1 | sq2 | sq3`*
